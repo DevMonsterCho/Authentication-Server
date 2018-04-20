@@ -1,5 +1,6 @@
 ### GET ### user list
-GET http://localhost:4000/api/auth/ HTTP/1.1
+GET http://localhost:4000/api/auth/list HTTP/1.1
+
 
 ### POST ### login dmcho84@gmail.com
 POST http://localhost:4000/api/auth/login HTTP/1.1
@@ -44,6 +45,17 @@ content-type: application/json
 
 ### POST ### Join 
 POST http://localhost:4000/api/auth/join HTTP/1.1
+content-type: application/json
+
+{
+    "name": "asdasd",
+    "email": "test@naver.com",
+    "password": "32098430598",
+    "time": "Sat, 14 Apr 2018 09:29:08 GMT"
+}
+
+### DELETE ### Delete 
+DELETE http://localhost:4000/api/auth/5ad84986e06ea51facd0b516 HTTP/1.1
 content-type: application/json
 
 {

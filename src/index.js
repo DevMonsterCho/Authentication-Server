@@ -5,7 +5,6 @@ const Router = require('koa-router');
 const bodyparser = require('koa-bodyparser');
 const session = require('koa-session');
 const redisStore = require('koa-redis');
-const passport = require('koa-passport');
 const mongoose = require('mongoose');
 const KeyGrip = require('keygrip');
 
@@ -28,7 +27,6 @@ mongoose.connect(mongoURI).then(() => {
 /** Application */
 const app = new Koa();
 const router = new Router();
-// const client = redisStore();
 
 /** Router */
 router.get('/', (ctx) => {
@@ -38,34 +36,66 @@ router.get('/', (ctx) => {
 /** MiddleWare */
 app.use(bodyparser());
 
-let count = 0;
+const client = new redisStore();
 // initialize session
-app.keys = new KeyGrip(['im a newer secret', 'i like tddfurtle'], 'sha256');
-const CONFIG = {
+app.keys = new KeyGrip([`im a newer secret`, `i like tddfurtle`], 'sha256');
+app.use(session({
     key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
     /** (number || 'session') maxAge in ms (default is 1 days) */
     /** 'session' will result in a cookie that expires when session/browser is closed */
     /** Warning: If a session cookie is stolen, this cookie will never expire */
-    maxAge: 1000 * 60 * 5,
+    maxAge: (1000 * 60 * 1) * 60 * 24,
     overwrite: true, /** (boolean) can overwrite or not (default true) */
-    httpOnly: true, /** (boolean) httpOnly or not (default true) */
+    httpOnly: false, /** (boolean) httpOnly or not (default true) */
     signed: true, /** (boolean) signed or not (default true) */
     rolling: false, /** (boolean) Force a session identifier cookie to be set on every response. The expiration is reset to the original maxAge, resetting the expiration countdown. (default is false) */
-    renew: false, /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
-    store: redisStore(),
-};
-app.use(session(CONFIG, app));
-app.use((ctx, next) => {
+    renew: true, /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
+    store: client
+}, app));
+app.use( async (ctx, next) => {
+    ctx.cache = client;
+    console.log(ctx.request)
+    console.log(`@@@@@@@@@@@@@@@@@@@@@@@@@`)
+
+    await next();
+});
+app.use( async (ctx, next) => {
     let sess = ctx.cookies.get('koa:sess');
     console.log(`sess : `, sess);
+    let user = {
+        email: null,
+        name: 'guest'
+    }
     if (!sess) {
+        ctx.user = user;
+        console.log(`ctx.session : `, null);
         return next();
     } else {
-        console.log(`ctx.session : `, ctx.session);
+        sessUser = await ctx.cache.get(sess);
+        if(sessUser) {
+            user = sessUser;
+            ctx.session = null;
+            // await ctx.cookies.set('koa:sess', null);
+            console.log(sessUser);
+            ctx.session = sessUser;
+        }else {
+            console.log(`sess : (before destroy)`, sess);
+            // await ctx.cache.destroy(sess);
+            ctx.session = null;
+            await ctx.cookies.set('koa:sess', null);
+        }
+        ctx.user = user;
+        let time = new Date(user._expire);
+        console.log(`ctx.session : `, ctx.user);
+        console.log(`time : `, time)
     }
     return next();
 });
-
+app.use( async (ctx, next) => {
+    console.log(ctx.request.body);
+    console.log(`@@@@@@@@@@ end @@@@@@@@@@`)
+    await next();
+})
 router.use('/api', api.routes());
 app.use(router.routes()).use(router.allowedMethods());
 
