@@ -36,6 +36,7 @@ router.get('/', (ctx) => {
 /** MiddleWare */
 app.use((ctx, next) => {
     console.log(ctx.origin);
+    
     // const allowedHosts = [
     //     'authentication.dmcho.com',
     //     'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
@@ -59,8 +60,7 @@ app.use((ctx, next) => {
     ctx.response.set('Access-Control-Allow-Origin', "*");
     ctx.response.set('Access-Control-Allow-Credentials', true);
     ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
-    ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
-    
+    ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
 
     return next();
 })
