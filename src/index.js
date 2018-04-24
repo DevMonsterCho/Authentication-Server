@@ -34,11 +34,40 @@ router.get('/', (ctx) => {
 });
 
 /** MiddleWare */
+app.use((ctx, next) => {
+    console.log(ctx.origin);
+    const allowedHosts = [
+        'dmcho.com',
+        'authentication.dmcho.com',
+        'www.authentication.dmcho.com',
+        'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
+    ];
+    const origin = ctx.origin;
+    allowedHosts.every(el => {
+        if(!origin) return false;
+
+        console.log(`origin.indexOf(el) !== -1`)
+        console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
+
+        if(origin.indexOf(el) !== -1) {
+            console.log(origin.indexOf(el))
+            ctx.response.set('Access-Control-Allow-Origin', origin);
+            return false;
+        }
+        return true;
+    });
+
+    ctx.set('Access-Control-Allow-Credentials', true);
+    ctx.response.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+
+    return next();
+})
 app.use(bodyparser());
 
 const client = new redisStore();
 // initialize session
 app.keys = new KeyGrip([`im a newer secret`, `i like tddfurtle`], 'sha256');
+
 app.use(session({
     key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
     /** (number || 'session') maxAge in ms (default is 1 days) */
@@ -52,6 +81,7 @@ app.use(session({
     renew: true, /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
     store: client
 }, app));
+
 app.use( async (ctx, next) => {
     ctx.cache = client;
     console.log(ctx.request)
@@ -59,6 +89,7 @@ app.use( async (ctx, next) => {
 
     await next();
 });
+
 app.use( async (ctx, next) => {
     let sess = ctx.cookies.get('koa:sess');
     console.log(`sess : `, sess);
@@ -91,11 +122,13 @@ app.use( async (ctx, next) => {
     }
     return next();
 });
+
 app.use( async (ctx, next) => {
     console.log(ctx.request.body);
     console.log(`@@@@@@@@@@ end @@@@@@@@@@`)
     await next();
 })
+
 router.use('/api', api.routes());
 app.use(router.routes()).use(router.allowedMethods());
 
@@ -111,3 +144,4 @@ const cryptoPbkdf2Sync = (password) => {
     let key = crypto.pbkdf2Sync(password, 'salt', 100000, 64, 'sha512');
     return key.toString('base64');
 }
+
