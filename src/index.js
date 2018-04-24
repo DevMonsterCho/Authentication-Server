@@ -56,8 +56,8 @@ app.use((ctx, next) => {
     //     return true;
     // });
 
-    ctx.response.set('Access-Control-Allow-Origin', 'authentication.dmcho.com');
-    // ctx.set('Access-Control-Allow-Credentials', true);
+    ctx.response.set('Access-Control-Allow-Origin', 'https://authentication.dmcho.com');
+    ctx.response.set('Access-Control-Allow-Credentials', true);
     ctx.response.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
     return next();
