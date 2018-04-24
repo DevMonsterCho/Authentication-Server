@@ -37,9 +37,9 @@ router.get('/', (ctx) => {
 app.use((ctx, next) => {
     console.log(ctx.origin);
     const allowedHosts = [
-        'dmcho.com',
-        'authentication.dmcho.com',
-        'www.authentication.dmcho.com',
+        'https://dmcho.com',
+        'https://authentication.dmcho.com',
+        'https://www.authentication.dmcho.com',
         'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
     ];
     const origin = ctx.origin;
