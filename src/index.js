@@ -37,12 +37,11 @@ router.get('/', (ctx) => {
 app.use((ctx, next) => {
     console.log(ctx.origin);
     const allowedHosts = [
-        'https://dmcho.com',
-        'https://authentication.dmcho.com',
-        'https://www.authentication.dmcho.com',
+        'authentication.dmcho.com',
         'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
     ];
     const origin = ctx.origin;
+    console.log('origin : ', origin);
     allowedHosts.every(el => {
         if(!origin) return false;
 
@@ -56,7 +55,7 @@ app.use((ctx, next) => {
         }
         return true;
     });
-
+  
     ctx.set('Access-Control-Allow-Credentials', true);
     ctx.response.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
