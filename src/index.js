@@ -50,12 +50,12 @@ app.use((ctx, next) => {
 
         if(origin.indexOf(el) !== -1) {
             console.log(origin.indexOf(el))
-            ctx.response.set('Access-Control-Allow-Origin', origin);
+            ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
             return false;
         }
         return true;
     });
-  
+
     ctx.set('Access-Control-Allow-Credentials', true);
     ctx.response.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
