@@ -35,35 +35,27 @@ router.get('/', (ctx) => {
 
 /** MiddleWare */
 app.use((ctx, next) => {
-    console.log(ctx.origin);
-    console.log(ctx.method);
-    if(ctx.method === 'OPTIONS') {
-        const allowedHosts = [
-            'authentication.dmcho.com',
-            'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
-        ];
-        const origin = ctx.origin;
-        console.log('origin : ', origin);
-        allowedHosts.every(el => {
-            if(!origin) return false;
-    
-            console.log(`origin.indexOf(el) !== -1`)
-            console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
-    
-            if(origin.indexOf(el) !== -1) {
-                console.log(origin.indexOf(el))
-                ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
-                return false;
-            }
-            return true;
-        });
-    
-        // ctx.response.set('Access-Control-Allow-Origin', "*");
-        ctx.response.set('Access-Control-Allow-Credentials', true);
-        ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
-        ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
-        
-    }
+    const allowedHosts = [
+        'authentication.dmcho.com',
+        'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
+    ];
+    const origin = ctx.origin;
+    console.log('origin : ', origin);
+    allowedHosts.every(el => {
+        if (!origin) return false;
+        console.log(`origin.indexOf(el) !== -1`)
+        console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
+        if (origin.indexOf(el) !== -1) {
+            console.log(origin.indexOf(el))
+            ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
+            return false;
+        }
+        return true;
+    });
+    // ctx.response.set('Access-Control-Allow-Origin', "*");
+    ctx.response.set('Access-Control-Allow-Credentials', true);
+    ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
+    ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
     return next();
 })
 app.use(bodyparser());
@@ -86,7 +78,7 @@ app.use(session({
     store: client
 }, app));
 
-app.use( async (ctx, next) => {
+app.use(async (ctx, next) => {
     ctx.cache = client;
     console.log(ctx.request)
     console.log(`@@@@@@@@@@@@@@@@@@@@@@@@@`)
@@ -94,7 +86,7 @@ app.use( async (ctx, next) => {
     await next();
 });
 
-app.use( async (ctx, next) => {
+app.use(async (ctx, next) => {
     let sess = ctx.cookies.get('koa:sess');
     console.log(`sess : `, sess);
     let user = {
@@ -107,13 +99,13 @@ app.use( async (ctx, next) => {
         return next();
     } else {
         sessUser = await ctx.cache.get(sess);
-        if(sessUser) {
+        if (sessUser) {
             user = sessUser;
             ctx.session = null;
             // await ctx.cookies.set('koa:sess', null);
             console.log(sessUser);
             ctx.session = sessUser;
-        }else {
+        } else {
             console.log(`sess : (before destroy)`, sess);
             // await ctx.cache.destroy(sess);
             ctx.session = null;
@@ -127,7 +119,7 @@ app.use( async (ctx, next) => {
     return next();
 });
 
-app.use( async (ctx, next) => {
+app.use(async (ctx, next) => {
     console.log(ctx.request.body);
     console.log(`@@@@@@@@@@ end @@@@@@@@@@`)
     await next();
