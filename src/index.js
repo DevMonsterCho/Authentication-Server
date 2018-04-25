@@ -36,32 +36,34 @@ router.get('/', (ctx) => {
 /** MiddleWare */
 app.use((ctx, next) => {
     console.log(ctx.origin);
-
-    const allowedHosts = [
-        'authentication.dmcho.com',
-        'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
-    ];
-    const origin = ctx.origin;
-    console.log('origin : ', origin);
-    allowedHosts.every(el => {
-        if(!origin) return false;
-
-        console.log(`origin.indexOf(el) !== -1`)
-        console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
-
-        if(origin.indexOf(el) !== -1) {
-            console.log(origin.indexOf(el))
-            ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
-            return false;
-        }
-        return true;
-    });
-
-    // ctx.response.set('Access-Control-Allow-Origin', "*");
-    ctx.response.set('Access-Control-Allow-Credentials', true);
-    ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
-    ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
-
+    console.log(ctx.method);
+    if(ctx.method === 'OPTIONS') {
+        const allowedHosts = [
+            'authentication.dmcho.com',
+            'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
+        ];
+        const origin = ctx.origin;
+        console.log('origin : ', origin);
+        allowedHosts.every(el => {
+            if(!origin) return false;
+    
+            console.log(`origin.indexOf(el) !== -1`)
+            console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
+    
+            if(origin.indexOf(el) !== -1) {
+                console.log(origin.indexOf(el))
+                ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
+                return false;
+            }
+            return true;
+        });
+    
+        // ctx.response.set('Access-Control-Allow-Origin', "*");
+        ctx.response.set('Access-Control-Allow-Credentials', true);
+        ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
+        ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
+        return ctx.body = '';
+    }
     return next();
 })
 app.use(bodyparser());
