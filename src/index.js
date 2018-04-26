@@ -36,15 +36,13 @@ router.get('/', (ctx) => {
 /** MiddleWare */
 app.use((ctx, next) => {
     const allowedHosts = [
+        'dev.authentication.dmcho.com',
         'authentication.dmcho.com',
         'ec2-13-125-22-26.ap-northeast-2.compute.amazonaws.com'
     ];
     const origin = ctx.origin;
-    console.log('origin : ', origin);
     allowedHosts.every(el => {
         if (!origin) return false;
-        console.log(`origin.indexOf(el) !== -1`)
-        console.log(origin.indexOf(el), origin.indexOf(el) !== -1);
         if (origin.indexOf(el) !== -1) {
             console.log(origin.indexOf(el))
             ctx.response.set('Access-Control-Allow-Origin', ctx.header.origin);
@@ -52,7 +50,6 @@ app.use((ctx, next) => {
         }
         return true;
     });
-    // ctx.response.set('Access-Control-Allow-Origin', "*");
     ctx.response.set('Access-Control-Allow-Credentials', true);
     ctx.response.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT');
     ctx.response.set('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Access-Control-Allow-Credentials, Origin, Accept, X-Requested-With, Content-Type, crossDomain, Access-Control-Request-Method, Access-Control-Request-Headers');
@@ -74,7 +71,7 @@ app.use(session({
     httpOnly: false, /** (boolean) httpOnly or not (default true) */
     signed: true, /** (boolean) signed or not (default true) */
     rolling: false, /** (boolean) Force a session identifier cookie to be set on every response. The expiration is reset to the original maxAge, resetting the expiration countdown. (default is false) */
-    renew: true, /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
+    renew: false, /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
     store: client
 }, app));
 
@@ -101,15 +98,12 @@ app.use(async (ctx, next) => {
         sessUser = await ctx.cache.get(sess);
         if (sessUser) {
             user = sessUser;
-            ctx.session = null;
-            // await ctx.cookies.set('koa:sess', null);
-            console.log(sessUser);
+            console.log(`sessUser :: `, sessUser);
             ctx.session = sessUser;
         } else {
             console.log(`sess : (before destroy)`, sess);
-            // await ctx.cache.destroy(sess);
             ctx.session = null;
-            await ctx.cookies.set('koa:sess', null);
+            // await ctx.cookies.set('koa:sess', null);
         }
         ctx.user = user;
         let time = new Date(user._expire);

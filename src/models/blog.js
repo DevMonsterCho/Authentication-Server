@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const Blog = new Schema({
-    writerEmail: {
+    email: {
         type: String,
         required: true
     },
-    writerName: {
+    name: {
         type: String,
         required: true
     },

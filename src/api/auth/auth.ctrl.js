@@ -38,11 +38,12 @@ exports.join = async (ctx) => {
 }
 
 exports.login = async (ctx) => {
+    ctx.set('Content-Type', 'application/json;charset=UTF-8');
     const { email, password } = ctx.request.body;
     if(!email || !password) 
         ctx.status = 400;
-    if(!email) return ctx.body = `이메일을 입력하지 않으셨습니다.`;
-    if(!password) return ctx.body = `비밀번호를 입력하지 않으셨습니다.`;
+    if(!email) return ctx.body = {message: `이메일을 입력하지 않으셨습니다.`};
+    if(!password) return ctx.body = {message: `비밀번호를 입력하지 않으셨습니다.`};
     let passkey = cryptoPbkdf2Sync(password);
 
     try {
@@ -54,6 +55,7 @@ exports.login = async (ctx) => {
             }
             ctx.session = await data;
             let sess = await ctx.cookies.get('koa:sess');
+            console.log(`sess ::: `, sess);
             return ctx.body = {
                 sess,
                 user: data
@@ -61,11 +63,11 @@ exports.login = async (ctx) => {
         }
         ctx.status = 401;
         if(user) {
-            return ctx.body = `이메일 또는 비밀번호가 일치하지 않습니다.`;
+            return ctx.body = {message: `이메일 또는 비밀번호가 일치하지 않습니다.`};
         }
     } catch(e) {
         ctx.status = 400;
-        return ctx.body = `존재하지 않는 이메일 입니다.`;
+        return ctx.body = {message: `존재하지 않는 이메일 입니다.`};
     }
 }
 
@@ -106,8 +108,9 @@ exports.modify = async (ctx) => {
                 email: user.email,
                 name: user.name,
             }
-            ctx.session = await data;
-            let sess = await ctx.cookies.get('koa:sess');
+            let sess = ctx.session = await data;
+            console.log(`sess ::::: `, sess);
+            // let sess = await ctx.cookies.get('koa:sess');
             return ctx.body = {
                 sess,
                 user: data

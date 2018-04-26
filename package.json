@@ -7,7 +7,6 @@
     "cross-env": "^5.1.4",
     "dotenv": "^5.0.1",
     "global": "^4.3.2",
-    "ioredis": "^3.2.2",
     "keygrip": "^1.0.2",
     "koa": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
@@ -18,7 +17,6 @@
     "koa-router": "^7.4.0",
     "koa-session": "^5.8.1",
     "mongoose": "^5.0.14",
-    "pm2": "^2.10.2",
     "redis": "^2.8.0"
   },
   "scripts": {

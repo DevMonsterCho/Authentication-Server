@@ -5,30 +5,36 @@ const os = require('os');
 const path = require('path');
 
 exports.write = async (ctx) => {
+    console.log(`######## blog write #######`);
     console.log(ctx.request.body);
     console.log(ctx.user);
     if(!ctx.user.email) {
         ctx.status = 401;
         ctx.body = '로그인 후 이용 가능합니다.';
     }
-    const { title, text, file } = ctx.request.body;
+    const { email, name, title, text, md, files } = ctx.request.body;
     const blog = new Blog({
-        writerEmail: ctx.user.email,
-        writerName: ctx.user.name,
-        title, text, files: file ? file : null
+        email,
+        name,
+        title,
+        text,
+        md,
+        files,
     });
 
     console.log(blog);
     try {
         await blog.save();
-        ctx.body = blog;
+        ctx.body = {
+            blog: blog
+        };
 
     } catch (e) {
         ctx.throw(e, 500);
     }
     console.log(`write`);
-    
 }
+
 exports.delete = async (ctx) => {
     const { id } = ctx.params;
     const user = ctx.user;
@@ -48,7 +54,9 @@ exports.delete = async (ctx) => {
 exports.listAll = async (ctx) => {
     try {
         const blogs = await Blog.find().exec();
-        ctx.body = blogs;
+        ctx.body = {
+            list: blogs
+        };
     } catch (e) {
         ctx.throw(e, 500);
     }
