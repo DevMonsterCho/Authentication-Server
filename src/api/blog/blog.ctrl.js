@@ -8,10 +8,10 @@ exports.write = async (ctx) => {
     console.log(`######## blog write #######`);
     console.log(ctx.request.body);
     console.log(ctx.user);
-    if(!ctx.user.email) {
-        ctx.status = 401;
-        ctx.body = '로그인 후 이용 가능합니다.';
-    }
+    // if(!ctx.user.email) {
+    //     ctx.status = 401;
+    //     ctx.body = '로그인 후 이용 가능합니다.';
+    // }
     const { email, name, title, text, md, files } = ctx.request.body;
     const blog = new Blog({
         email,

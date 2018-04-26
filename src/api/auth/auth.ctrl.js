@@ -54,6 +54,9 @@ exports.login = async (ctx) => {
                 name: user.name,
             }
             ctx.session = await data;
+            ctx.cookies.set('kkkkkk', 'aaaaaaa', {
+                domain: `.authentication.dmcho.com`
+            });
             let sess = await ctx.cookies.get('koa:sess');
             console.log(`sess ::: `, sess);
             return ctx.body = {
