@@ -16,16 +16,48 @@ const Blog = new Schema({
         required: true
     },
     text: {
-        type: String,
-        required: true
+        type: String
     },
     md: {
         type: String,
     },
-    files: {
-        type: Array,
-    },
+    files: [
+        {
+            _id: {
+                type: String,
+                required: true,
+            },
+            uploader: {
+                type: String,
+                required: true,
+            },
+            size: {
+                type: Number,
+                required: true,
+            },
+            path: {
+                type: String,
+                required: true,
+            },
+            name: {
+                type: String,
+                required: true,
+            },
+            type: {
+                type: String,
+                required: true,
+            },
+            lastModifiedDate: {
+                type: Date,
+                required: true,
+            }
+        }
+    ],
     createDate: {
+        type: Date,
+        default: Date.now
+    },
+    modifyDate: {
         type: Date,
         default: Date.now
     }

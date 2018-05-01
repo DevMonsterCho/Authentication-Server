@@ -1,25 +1,24 @@
 const Blog = require('models/blog');
+const File = require('models/file');
 const { ObjectId } = require('mongoose').Types;
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
 
 exports.write = async (ctx) => {
     console.log(`######## blog write #######`);
     console.log(ctx.request.body);
     console.log(ctx.user);
-    // if(!ctx.user.email) {
-    //     ctx.status = 401;
-    //     ctx.body = '로그인 후 이용 가능합니다.';
-    // }
-    const { email, name, title, text, md, files } = ctx.request.body;
+    if(!ctx.user.email) {
+        ctx.status = 401;
+        return ctx.body = '로그인 후 이용 가능합니다.';
+    }
+    const { title, text, md, files } = ctx.request.body;
+    console.log(JSON.stringify(files, null, 2));
     const blog = new Blog({
-        email,
-        name,
+        email: ctx.user.email,
+        name: ctx.user.name,
         title,
         text,
         md,
-        files,
+        files
     });
 
     console.log(blog);
@@ -28,6 +27,20 @@ exports.write = async (ctx) => {
         ctx.body = {
             blog: blog
         };
+
+    } catch (e) {
+        ctx.throw(e, 500);
+    }
+    console.log(`write`);
+}
+
+exports.read = async (ctx) => {
+    console.log(`######## blog Read #######`);
+    const { id } = ctx.params;
+    try {
+        let blog = await Blog.findOne({_id: id}).exec();
+        if(!blog) return ctx.status = 400; ctx.body = {message: `해당 블로그가 존재하지 않습니다.`};
+        ctx.body = blog;
 
     } catch (e) {
         ctx.throw(e, 500);
@@ -63,9 +76,9 @@ exports.listAll = async (ctx) => {
 }
 
 exports.listUser = async (ctx) => {
-    const { useremail } = ctx.request.params;
+    const { email } = ctx.user;
     try {
-        const blogs = await Blog.find({email: useremail}).exec();
+        const blogs = await Blog.find({email}).exec();
         ctx.body = blogs;
     } catch (e) {
         ctx.throw(e, 500);

@@ -2,39 +2,45 @@ const User = require('models/user');
 const { ObjectId } = require('mongoose').Types;
 const crypto = require('crypto');
 
-const cryptoPbkdf2Sync = (password) => {
-    let key = crypto.pbkdf2Sync(password, 'salt', 777777, 64, 'sha512');
+const cryptoPbkdf2Sync = (password, salt = null) => {
+    let key = crypto.pbkdf2Sync(password, (salt ? salt : 'salt'), 777777, 64, 'sha512');
     return key.toString('base64');
 }
 
 exports.join = async (ctx) => {
     const { name, email, password } = ctx.request.body;
-    
     let passkey = cryptoPbkdf2Sync(password);
 
-    const user = new User({
-        name, 
-        email, 
-        password: passkey
-    });
-
-    try {
-        await user.save();
-        let data = {
-            email: user.email,
-            name: user.name,
+    const user = await User.findOne({email}).exec();
+    if(user) {
+        ctx.status = 400;
+        return ctx.body = {message: `이미 사용중인 이메일 입니다.`};
+    }else{
+        const user = new User({
+            name, 
+            email, 
+            password: passkey
+        });
+        try {
+            console.log(user);
+            await user.save();
+            let data = {
+                email: user.email,
+                name: user.name,
+            };
+            let sess = createSession(ctx, data);
+            return ctx.body = {
+                sess,
+                user: data
+            };
+            ctx.body = user
+        } catch (e) {
+            ctx.status = 500;
+            ctx.body = {message: `계정 생성에 문제가 발생하였습니다.`}
+            ctx.throw(e, 500, '계정 생성에 문제가 발생하였습니다.');
         }
-        ctx.session = await data;
-        let sess = await ctx.cookies.get('koa:sess');
-        return ctx.body = {
-            sess,
-            user: data
-        };
-
-        ctx.body = user
-    } catch (e) {
-        ctx.throw(e, 500);
     }
+    
 }
 
 exports.login = async (ctx) => {
@@ -53,25 +59,38 @@ exports.login = async (ctx) => {
                 email: user.email,
                 name: user.name,
             }
-            ctx.session = await data;
-            ctx.cookies.set('kkkkkk', 'aaaaaaa', {
-                domain: `.authentication.dmcho.com`
-            });
-            let sess = await ctx.cookies.get('koa:sess');
+            let sess = createSession(ctx, data);
             console.log(`sess ::: `, sess);
             return ctx.body = {
                 sess,
                 user: data
             };
-        }
-        ctx.status = 401;
-        if(user) {
+        } else {
+            ctx.status = 401;
             return ctx.body = {message: `이메일 또는 비밀번호가 일치하지 않습니다.`};
         }
     } catch(e) {
         ctx.status = 400;
         return ctx.body = {message: `존재하지 않는 이메일 입니다.`};
     }
+}
+
+const createSession = (ctx, data) => {
+    let agent = ctx.request.header['user-agent'];
+    let language = ctx.request.header['accept-language'];
+    let sessData = {...data, agent, language};
+    let sess = cryptoPbkdf2Sync(JSON.stringify(sessData));
+    let value = JSON.stringify(sessData);
+    
+    ctx.cache.set(sess, value, (err, data) => {
+        if(err){
+            console.log(err);
+            res.send("error "+err);
+            return;
+        }
+        ctx.cache.expire(sess, 100 * 60);
+    })
+    return sess;
 }
 
 exports.modify = async (ctx) => {
