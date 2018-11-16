@@ -46,9 +46,9 @@ kakaoCtrl.redirect = async ctx => {
           expires: now
         });
 
-        // return await kakaoCtrl.getUserInfo(res.data);
+        return await kakaoCtrl.getUserInfo(res.data);
         // kakaoCtrl.postUnlink(res.data);
-        kakaoCtrl.postTalkMessage(res.data);
+        // kakaoCtrl.postTalkMessage(res.data);
       }
     })
     .catch(async err => {
@@ -119,6 +119,7 @@ kakaoCtrl.connectApp = async data => {
     .then(res => {
       console.log(`${options.url} .then()`);
       console.log(res.data);
+      kakaoCtrl.getTalkProfile(data);
     })
     .catch(err => {
       console.log(`${options.url} .catch()`);
@@ -139,7 +140,12 @@ kakaoCtrl.getUserInfo = async data => {
     .then(res => {
       console.log(`${options.url} .then()`);
       console.log(res.data);
-      kakaoCtrl.getTalkProfile(data);
+      console.log(`res.data.has_signed - ${res.data.has_signed}`);
+      if (res.data.has_signed) {
+        kakaoCtrl.getTalkProfile(data);
+      } else {
+        kakaoCtrl.connectApp(data);
+      }
       return res.data;
     })
     .catch(err => {

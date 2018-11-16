@@ -13,6 +13,24 @@ const cryptoPbkdf2Sync = (password, salt = null) => {
   return key.toString("base64");
 };
 
+const createSession = (ctx, data) => {
+  let agent = ctx.request.header["user-agent"];
+  let language = ctx.request.header["accept-language"];
+  let sessData = { ...data, agent, language };
+  let sess = cryptoPbkdf2Sync(JSON.stringify(sessData));
+  let value = JSON.stringify(sessData);
+
+  ctx.cache.set(sess, value, (err, data) => {
+    if (err) {
+      console.log(err);
+      res.send("error " + err);
+      return;
+    }
+    ctx.cache.expire(sess, 100 * 60);
+  });
+  return sess;
+};
+
 exports.join = async ctx => {
   const { name, email, password } = ctx.request.body;
   let passkey = cryptoPbkdf2Sync(password);
@@ -81,24 +99,6 @@ exports.login = async ctx => {
     ctx.status = 400;
     return (ctx.body = { message: `존재하지 않는 이메일 입니다.` });
   }
-};
-
-const createSession = (ctx, data) => {
-  let agent = ctx.request.header["user-agent"];
-  let language = ctx.request.header["accept-language"];
-  let sessData = { ...data, agent, language };
-  let sess = cryptoPbkdf2Sync(JSON.stringify(sessData));
-  let value = JSON.stringify(sessData);
-
-  ctx.cache.set(sess, value, (err, data) => {
-    if (err) {
-      console.log(err);
-      res.send("error " + err);
-      return;
-    }
-    ctx.cache.expire(sess, 100 * 60);
-  });
-  return sess;
 };
 
 exports.modify = async ctx => {

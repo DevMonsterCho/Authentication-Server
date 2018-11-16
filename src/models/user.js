@@ -20,7 +20,10 @@ const User = new Schema({
   oauth: {
     kakao: {
       id: String,
-      access_token: String
+      access_token: String,
+      refresh_token: String,
+      expires_in: Date,
+      refresh_token_expires_in: Date
     }
   },
   createDate: {
